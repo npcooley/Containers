@@ -1,0 +1,20 @@
+---
+title: "Containers"
+author: 
+  - Nicholas P. Cooley, Department of Biomedical Informatics, University of Pittsburgh
+date: "`r Sys.Date()`"
+output:
+  github_document: default
+  html_document: default
+knit: (function(inputFile, encoding) {
+                rmarkdown::render(inputFile,
+                                  encoding = encoding,
+                                  output_format = "all")
+        })
+always_allow_html: true
+---
+
+# Contents:
+
+This repo contains folders with the Dockerfiles that build containers used by the author and the Wright Lab at the University of Pittsburgh. Many are built with the express purpose of managing environments on the Open Science Grid, some are not.
+

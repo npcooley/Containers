@@ -1,0 +1,19 @@
+---
+title: "Breseq"
+author: 
+  - Nicholas P. Cooley, Department of Biomedical Informatics, University of Pittsburgh
+date: "`r Sys.Date()`"
+output:
+  github_document: default
+  html_document: default
+knit: (function(inputFile, encoding) {
+                rmarkdown::render(inputFile,
+                                  encoding = encoding,
+                                  output_format = "all")
+        })
+always_allow_html: true
+---
+
+# Breseq
+
+Breseq in an R-base container, build for testing and other use cases.
