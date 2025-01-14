@@ -114,7 +114,8 @@ RUN install.r remotes \
    aricode \
    Rfast \
    data.table \
-	 dplyr
+	 dplyr \
+	 argparser
 
 # Ensure correct bioc version for DECIPHER and SynExtend
 RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::install(c('DECIPHER', 'SynExtend', 'rtracklayer', 'Rsamtools'), type = 'source')"

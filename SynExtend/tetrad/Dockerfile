@@ -18,11 +18,12 @@ FROM r-base:4.4.1
 # SRAToolkit
 # + dependencies
 
-ENV BLAST_VERSION "2.16.0"
-ENV HMMER_VERSION "3.3.2"
-ENV MCL_VERSION "14-137"
-ENV BIOC_VERSION "3.20"
-ENV SRA_VERSION "3.0.5"
+ENV BLAST_VERSION="2.16.0"
+ENV HMMER_VERSION="3.3.2"
+ENV MCL_VERSION="14-137"
+ENV BIOC_VERSION="3.20"
+ENV SRA_VERSION="3.0.5"
+ENV CAUSAL="1.12.0"
 
 # OS Dependencies
 # libtbb2 -- requested by bowtie2, seems to be deprecated, replaced with libtbbmalloc2
@@ -47,7 +48,8 @@ RUN apt-get update && \
     libtbbmalloc2 \
     libglib2.0-dev \
     libglib2.0-dev-bin \
-    libgirepository-2.0 && \
+    libgirepository-2.0 \
+    default-jre && \
    apt-get -y autoclean && \
    rm -rf /var/lib/apt/lists/*
    
@@ -70,7 +72,8 @@ RUN install.r remotes \
    Rfast \
    data.table \
 	 dplyr \
-	 argparser
+	 argparser \
+	 survival
 
 # Ensure correct bioc version for DECIPHER and SynExtend
 RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::install(c('DECIPHER', 'SynExtend', 'rtracklayer', 'Rsamtools'), type = 'source')"
@@ -143,19 +146,14 @@ ENV HOME=/root
 
 ENV PATH=$PATH:/usr/local/bin
 
-RUN git clone https://github.com/eXascaleInfolab/LFR-Benchmark_UndirWeightOvp.git && \
-  cd LFR-Benchmark_UndirWeightOvp && \
-  make && \
-  cd ..
-
-ENV PATH=$PATH:/LFR-Benchmark_UndirWeightOvp
-
 RUN git clone https://github.com/pylelab/USalign.git && \
   cd USalign && \
   make && \
   cd ..
 
 ENV PATH=$PATH:/USalign
+
+RUN wget https://s01.oss.sonatype.org/content/repositories/releases/io/github/cmu-phil/causal-cmd/$CAUSAL/causal-cmd-$CAUSAL-jar-with-dependencies.jar
 
 WORKDIR /
 
