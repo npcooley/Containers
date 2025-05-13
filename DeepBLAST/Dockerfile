@@ -1,38 +1,25 @@
-FROM r-base:4.5.0
+FROM r-base:4.4.1
 
-# file edits on 2025 04 30
-# versioning after bioc versions because i've absolutely lost my mind and can't HMMER_VERSION
-# stick to naming or versioning conventions
-# use 'tee' to both show logs and capture
-# 'docker build --no-cache -t npcooley/synextend:slim.1.21.0 . 2>&1 | tee build.log'
+# file edits on 2024 12 04
+# 'docker build --no-cache -t npcooley/synextend:slim.1.20.0.deepblast .'
 # version after the bioconductor release -- this makes more sense i think ...
-# 'docker push npcooley/synextend:slim.1.20.0'
+# 'docker push npcooley/synextend:slim.1.20.0.deepblast'
 # singularity containers may need have their paths adjusted, i.e. 'export PATH=/blast/ncbi-blast-x.y.z+/bin:$PATH'
-# 'docker run -i -t --rm npcooley/synextend:1.20.0' will run image locally
-# 'docker run -i -t --rm  -v ~/localdata/:/mnt/mydata/ npcooley/synextend:slim.1.20.0' and remove once it's been closed -- use to check packages, functions, etc...
+# 'docker run -i -t --rm npcooley/synextend:1.20.0.deepblast' will run image locally
+# 'docker run -i -t --rm  -v ~/localdata/:/mnt/mydata/ npcooley/synextend:slim.1.20.0.deepblast' and remove once it's been closed -- use to check packages, functions, etc...
 
-# this is a lighter weight version of the container I've been historically using
-# on the OSG, containing only:
-# DECIPHER
-# SynExtend
-# BLAST
-# HMMER
-# MCL
-# SRAToolkit
-# + dependencies
+# tack deepblast and maybe tm-vec into the slim container for use on the grid
 
-ENV BLAST_VERSION="2.16.0"
-ENV HMMER_VERSION="3.3.2"
-ENV MCL_VERSION="14-137"
-ENV BIOC_VERSION="3.21"
-ENV SRA_VERSION="3.0.5"
+ENV BLAST_VERSION "2.16.0"
+ENV HMMER_VERSION "3.3.2"
+ENV MCL_VERSION "14-137"
+ENV BIOC_VERSION "3.20"
+ENV SRA_VERSION "3.0.5"
 
 # OS Dependencies
 # libtbb2 -- requested by bowtie2, seems to be deprecated, replaced with libtbbmalloc2
-# libcurl4-openssl-dev version stuff ... https://packages.debian.org/trixie/libcurl4-openssl-dev
-# libglib2.0-dev relies on deprecated version: libglib2.0-0t64=2.84.1-1
 RUN apt-get update && \
-    apt-get -y --allow-downgrades --fix-missing install nano \
+    apt-get -y install nano \
     bash-completion \
     build-essential \
     software-properties-common \
@@ -49,7 +36,6 @@ RUN apt-get update && \
     libboost-all-dev \
     cmake \
     cwltool \
-    mpich \
     libtbbmalloc2 \
     libglib2.0-dev \
     libglib2.0-dev-bin \
@@ -76,21 +62,10 @@ RUN install.r remotes \
    Rfast \
    data.table \
 	 dplyr \
-	 argparser \
-	 RSQLite \
-	 speakeasyR
+	 argparser
 
 # Ensure correct bioc version for DECIPHER and SynExtend
-# new in 1.21:
-# Error: Bioconductor version not changed by 'install()'; in non-interactive sessions use 'ask = FALSE'
-RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION', ask = FALSE) ; BiocManager::install(c('DECIPHER', 'SynExtend', 'rtracklayer', 'Rsamtools'), type = 'source')"
-
-# install the devel version from github because i'm a gremlim with too many tasks, this version number will change though...
-RUN git clone https://github.com/npcooley/SynExtend.git && \
-  R CMD build --no-build-vignettes SynExtend && \
-  Rscript -e "install.packages(pkgs = 'SynExtend_1.21.0.tar.gz', type = 'source', repos = NULL)" && \
-  rm -rf SynExtend && \
-  rm SynExtend_1.21.0.tar.gz
+RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION') ; BiocManager::install(c('DECIPHER', 'SynExtend', 'rtracklayer', 'Rsamtools'), type = 'source')"
 
 # EDirect
 RUN sh -c "$(curl -fsSL ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirect.sh)" && \
@@ -158,9 +133,14 @@ RUN mkdir installmcl && \
 
 ENV HOME=/root
 
-# why did i put this here? is this an mcl thing?
 ENV PATH=$PATH:/usr/local/bin
 
+RUN git clone https://github.com/eXascaleInfolab/LFR-Benchmark_UndirWeightOvp.git && \
+  cd LFR-Benchmark_UndirWeightOvp && \
+  make && \
+  cd ..
+
+ENV PATH=$PATH:/LFR-Benchmark_UndirWeightOvp
 
 RUN git clone https://github.com/pylelab/USalign.git && \
   cd USalign && \
@@ -169,11 +149,10 @@ RUN git clone https://github.com/pylelab/USalign.git && \
 
 ENV PATH=$PATH:/USalign
 
-RUN git clone https://bitbucket.org/azadcse/hipmcl.git && \
-  cd hipmcl && \
-  cmake . -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && \
-  make && \
-  cd ..
+RUN apt-get update -y && \
+  apt-get install -y pip pipx && \
+  pipx install deepblast && \
+  pipx ensurepath
 
 WORKDIR /
 
