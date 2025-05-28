@@ -26,6 +26,7 @@ ENV HMMER_VERSION="3.3.2"
 ENV MCL_VERSION="14-137"
 ENV BIOC_VERSION="3.21"
 ENV SRA_VERSION="3.0.5"
+ENV SYN_DEV_VERSION="1.21.1"
 
 # OS Dependencies
 # libtbb2 -- requested by bowtie2, seems to be deprecated, replaced with libtbbmalloc2
@@ -51,6 +52,7 @@ RUN apt-get update && \
     cwltool \
     mpich \
     libtbbmalloc2 \
+    libpq-dev \
     libglib2.0-dev \
     libglib2.0-dev-bin \
     libgirepository-2.0 && \
@@ -78,7 +80,8 @@ RUN install.r remotes \
 	 dplyr \
 	 argparser \
 	 RSQLite \
-	 speakeasyR
+	 speakeasyR \
+	 RPostgres
 
 # Ensure correct bioc version for DECIPHER and SynExtend
 # new in 1.21:
@@ -88,9 +91,9 @@ RUN Rscript -e "BiocManager::install(version = '$BIOC_VERSION', ask = FALSE) ; B
 # install the devel version from github because i'm a gremlim with too many tasks, this version number will change though...
 RUN git clone https://github.com/npcooley/SynExtend.git && \
   R CMD build --no-build-vignettes SynExtend && \
-  Rscript -e "install.packages(pkgs = 'SynExtend_1.21.0.tar.gz', type = 'source', repos = NULL)" && \
+  Rscript -e "install.packages(pkgs = 'SynExtend_$SYN_DEV_VERSION.tar.gz', type = 'source', repos = NULL)" && \
   rm -rf SynExtend && \
-  rm SynExtend_1.21.0.tar.gz
+  rm SynExtend_$SYN_DEV_VERSION.tar.gz
 
 # EDirect
 RUN sh -c "$(curl -fsSL ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirect.sh)" && \
@@ -160,7 +163,6 @@ ENV HOME=/root
 
 # why did i put this here? is this an mcl thing?
 ENV PATH=$PATH:/usr/local/bin
-
 
 RUN git clone https://github.com/pylelab/USalign.git && \
   cd USalign && \
