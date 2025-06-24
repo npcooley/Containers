@@ -55,7 +55,8 @@ RUN apt-get update && \
     libpq-dev \
     libglib2.0-dev \
     libglib2.0-dev-bin \
-    libgirepository-2.0 && \
+    libgirepository-2.0 \
+    postgresql && \
    apt-get -y autoclean && \
    rm -rf /var/lib/apt/lists/*
    
@@ -77,11 +78,11 @@ RUN install.r remotes \
    aricode \
    Rfast \
    data.table \
-	 dplyr \
-	 argparser \
-	 RSQLite \
-	 speakeasyR \
-	 RPostgres
+   dplyr \
+   argparser \
+   RSQLite \
+   speakeasyR \
+   RPostgres
 
 # Ensure correct bioc version for DECIPHER and SynExtend
 # new in 1.21:
@@ -176,6 +177,8 @@ RUN git clone https://bitbucket.org/azadcse/hipmcl.git && \
   cmake . -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && \
   make && \
   cd ..
+
+ENV PATH=$PATH:/hipmcl/bin
 
 WORKDIR /
 
