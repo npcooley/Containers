@@ -51,6 +51,9 @@ RUN apt-get update && apt-get install -y \
   g++-11 \
   gcc-12 \
   g++-12 \
+  texlive-base \
+  texlive-latex-base \
+  texlive-fonts-extra \
   && apt-get -y autoclean \
   && rm -rf /var/lib/apt/lists/*
 
@@ -59,7 +62,7 @@ RUN apt-get update && apt-get install -y \
 
 # packages that are generally applicable to doing development remotely through
 # an RStudio server instance
-RUN Rscript -e "install.packages('gitcreds')"
+RUN Rscript -e "install.packages(c('gitcreds', 'knitr', 'rmarkdown'))"
 
 # packages that are usecase specific
 RUN Rscript -e "install.packages('OpenCL', type = 'source')"
