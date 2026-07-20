@@ -21,6 +21,12 @@
 #         scp taxalogue.sif cluster:/path/to/software/
 # ---------------------------------------------------------------------------
 
+# first call to download:
+# sbatch scripts/run_taxalogue.sh docker://npcooley/taxalogue:0.0.2 --taxon Arthropoda download --gbol --midori
+
+# second call to classify and build sequence databases:
+# sbatch scripts/run_taxalogue.sh docker://npcooley/taxalogue:0.0.2 --taxon Arthropoda classify --gbol --midori
+
 FROM --platform=linux/amd64 ruby:3.1-bookworm
 
 # Explicit, pinned version so the image is reproducible even if the taxalogue
